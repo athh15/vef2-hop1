@@ -35,3 +35,13 @@ CREATE TABLE productorders (
   product_id serial REFERENCES products(id),
   amount int not null
 );
+
+CREATE TABLE todos (
+  id serial primary key,
+  title varchar(128) not null,
+  position int default 0,
+  completed boolean default false,
+  due timestamp with time zone,
+  created timestamp with time zone not null default current_timestamp,
+  updated timestamp with time zone not null default current_timestamp
+);
