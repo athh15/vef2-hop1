@@ -94,9 +94,12 @@ async function todoRoute(req, res) {
  */
 async function patchRoute(req, res) {
   const { id } = req.params;
-  const { title, due, position, completed } = req.body;
-
-  const item = { title, due, position, completed };
+  const {
+    title, price, about, img,
+  } = req.body;
+  const item = {
+    title, price, about, img,
+  };
 
   const result = await updateTodo(id, item);
 
@@ -132,8 +135,8 @@ async function deleteRoute(req, res) {
 
 router.get('/products', catchErrors(listRoute));
 router.get('/products/:id', catchErrors(todoRoute));
-router.post('/', catchErrors(createRoute));
-router.patch('/:id', catchErrors(patchRoute));
-router.delete('/:id', catchErrors(deleteRoute));
+router.post('/products', catchErrors(createRoute));
+router.patch('/products/:id', catchErrors(patchRoute));
+router.delete('/products/:id', catchErrors(deleteRoute));
 
 module.exports = router;

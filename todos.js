@@ -38,7 +38,9 @@ function isEmpty(s) {
  * @param {boolean} [patching=false]
  * @returns {array} Fylki af villum sem komu upp, tómt ef engin villa
  */
-function validate({ title, due, position, completed } = {}, patching = false) {
+function validate({
+  title, due, position, completed,
+} = {}, patching = false) {
   const errors = [];
 
   if (!patching || !isEmpty(title)) {
@@ -152,7 +154,9 @@ async function readTodo(id) {
  * @param {TodoItem} todo Todo item til að búa til.
  * @returns {Result} Niðurstaða þess að búa til item
  */
-async function createTodo({ title, price, about, img } = {}) {
+async function createTodo({
+  title, price, about, img,
+} = {}) {
   // const validation = validate({ title, due, position });
   const validation = [];
   if (validation.length > 0) {
@@ -201,8 +205,12 @@ async function createTodo({ title, price, about, img } = {}) {
  * @param {TodoItem} todo Todo item með gildum sem á að uppfæra
  * @returns {Result} Niðurstaða þess að búa til item
  */
-async function updateTodo(id, { title, due, position, completed }) {
-  const validation = validate({ title, due, position, completed }, true);
+async function updateTodo(id, {
+  title, price, about, img,
+}) {
+  const validation = validate({
+    title, price, about, img,
+  }, true);
 
   if (validation.length > 0) {
     return {
@@ -213,27 +221,28 @@ async function updateTodo(id, { title, due, position, completed }) {
 
   const filteredValues = [
     xss(title),
-    due ? xss(due) : null,
-    position ? xss(position) : null,
+    price ? xss(price) : null,
+    about ? xss(about) : null,
+    img ? xss(img) : null,
   ]
     .filter(Boolean)
     .concat([
-      completed != null ? Boolean(completed) : null,
+      // completed != null ? Boolean(completed) : null,
     ]);
 
   const updates = [
     title ? 'title' : null,
-    due ? 'due' : null,
-    position ? 'position' : null,
-    completed != null ? 'completed' : null,
+    price ? 'price' : null,
+    about ? 'about' : null,
+    img != null ? 'img' : null,
   ]
     .filter(Boolean)
     .map((field, i) => `${field} = $${i + 2}`);
 
   const sqlQuery = `
-    UPDATE todos
+    UPDATE products
     SET ${updates} WHERE id = $1
-    RETURNING id, title, position, due, created, updated, completed`;
+    RETURNING id, title, price, about, img`;
   const values = [id, ...filteredValues];
 
   const result = await query(sqlQuery, values);
@@ -256,7 +265,7 @@ async function updateTodo(id, { title, due, position, completed }) {
 }
 
 async function deleteTodo(id) {
-  const q = 'DELETE FROM todos WHERE id = $1';
+  const q = 'DELETE FROM products WHERE id = $1';
 
   const result = await query(q, [id]);
 
