@@ -126,9 +126,9 @@ async function listTodos(order = 'asc', completed = undefined) {
 async function readTodo(id) {
   const q = `
     SELECT
-      id, title, position, due, created, updated, completed
+      id, title, price, about, img, created
     FROM
-      todos
+      products
     WHERE id = $1`;
 
   let result = null;
@@ -152,9 +152,9 @@ async function readTodo(id) {
  * @param {TodoItem} todo Todo item til að búa til.
  * @returns {Result} Niðurstaða þess að búa til item
  */
-async function createTodo({ title, due, position } = {}) {
-  const validation = validate({ title, due, position });
-
+async function createTodo({ title, price, about, img } = {}) {
+  // const validation = validate({ title, due, position });
+  const validation = [];
   if (validation.length > 0) {
     return {
       success: false,
@@ -166,23 +166,24 @@ async function createTodo({ title, due, position } = {}) {
 
   const columns = [
     'title',
-    due ? 'due' : null,
-    position ? 'position' : null,
+    price ? 'price' : null,
+    about ? 'about' : null,
+    img ? 'img' : null,
   ].filter(Boolean);
 
   const values = [
     xss(title),
-    due ? xss(due) : null,
-    position ? xss(position) : null,
+    price ? xss(price) : null,
+    about ? xss(about) : null,
+    img ? xss(img) : null,
   ].filter(Boolean);
 
   const params = values.map((_, i) => `$${i + 1}`);
 
   const sqlQuery = `
-    INSERT INTO todos (${columns.join(',')})
+    INSERT INTO products (${columns.join(',')})
     VALUES (${params})
-    RETURNING id, title, position, due, created, updated, completed`;
-
+    RETURNING id, title, price, about, img`;
   const result = await query(sqlQuery, values);
 
   return {

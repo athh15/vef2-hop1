@@ -45,9 +45,19 @@ async function listRoute(req, res) {
  * @returns {object} Todo sem búið var til eða villur
  */
 async function createRoute(req, res) {
-  const { title, due, position } = req.body;
+  const {
+    title,
+    price,
+    about,
+    img,
+  } = req.body;
 
-  const result = await createTodo({ title, due, position });
+  const result = await createTodo({
+    title,
+    price,
+    about,
+    img,
+  });
 
   if (!result.success) {
     return res.status(400).json(result.validation);
@@ -121,7 +131,7 @@ async function deleteRoute(req, res) {
 }
 
 router.get('/products', catchErrors(listRoute));
-router.get('/:id', catchErrors(todoRoute));
+router.get('/products/:id', catchErrors(todoRoute));
 router.post('/', catchErrors(createRoute));
 router.patch('/:id', catchErrors(patchRoute));
 router.delete('/:id', catchErrors(deleteRoute));
