@@ -104,14 +104,14 @@ async function listTodos(order = 'asc', completed = undefined) {
       id, title, price, about, img, created
     FROM products
     WHERE completed = $1
-    ORDER BY id ${orderString}`;
+    ORDER BY created ${orderString}`;
     result = await query(q, [completedAsBoolean]);
   } else {
     const q = `
     SELECT
       id, title, price, about, img, created
     FROM products
-    ORDER BY id ${orderString}`;
+    ORDER BY created ${orderString}`;
 
     result = await query(q);
   }
