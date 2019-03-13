@@ -1,11 +1,11 @@
 CREATE TABLE categories (
-  id serial primary key, 
+  id serial primary key,
   title varchar(128) not null
 );
 
 CREATE TABLE products (
   id serial primary key,
-  category_id serial REFERENCES categories(id),    
+  -- category_id serial REFERENCES categories(id),
   title varchar(128) not null,
   price int not null,
   about text not null,
@@ -36,4 +36,12 @@ CREATE TABLE productorders (
   amount int not null
 );
 
-
+CREATE TABLE todos (
+  id serial primary key,
+  title varchar(128) not null,
+  position int default 0,
+  completed boolean default false,
+  due timestamp with time zone,
+  created timestamp with time zone not null default current_timestamp,
+  updated timestamp with time zone not null default current_timestamp
+);
