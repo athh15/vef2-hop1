@@ -7,7 +7,7 @@ CREATE TABLE categories
 CREATE TABLE products
 (
   id serial primary key,
-  -- category_id serial REFERENCES categories(id),
+  category_id integer REFERENCES categories(id) not null,
   title varchar(128) not null,
   price float not null,
   about text not null,
