@@ -10,15 +10,15 @@ const { findById, findByEmail, comparePasswords } = require('./users');
 const api = require('./api');
 
 const {
-    PORT: port = 3000,
-    JWT_SECRET: jwtSecret,
-    TOKEN_LIFETIME: tokenLifetime = 20 * 60,
-    HOST: host = '127.0.0.1',
+  PORT: port = 3000,
+  JWT_SECRET: jwtSecret,
+  TOKEN_LIFETIME: tokenLifetime = 20 * 60,
+  HOST: host = '127.0.0.1',
 } = process.env;
 
 if (!jwtSecret) {
-    console.error('JWT_SECRET not registered in .env');
-    process.exit(1);
+  console.error('JWT_SECRET not registered in .env');
+  process.exit(1);
 }
 
 const app = express();
@@ -27,18 +27,18 @@ app.use(express.json());
 app.use(api);
 
 const jwtOptions = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: jwtSecret,
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: jwtSecret,
 };
 
 async function strat(data, next) {
-    const user = await findById(data.id);
+  const user = await findById(data.id);
 
-    if (user) {
-        next(null, user);
-    } else {
-        next(null, false);
-    }
+  if (user) {
+    next(null, user);
+  } else {
+    next(null, false);
+  }
 }
 
 passport.use(new Strategy(jwtOptions, strat));
@@ -46,25 +46,24 @@ passport.use(new Strategy(jwtOptions, strat));
 app.use(passport.initialize());
 
 async function login(req, res) {
-    const { email, password = '' } = req.body;
+  const { email, password = '' } = req.body;
 
-    const user = await findByEmail(email);
+  const user = await findByEmail(email);
 
-    if (!user) {
-        return res.status(401).json({ error: 'No such user' });
-    }
+  if (!user) {
+    return res.status(401).json({ error: 'No such user' });
+  }
 
-    const passwordIsCorrect =
-        await comparePasswords(password, user.password);
+  const passwordIsCorrect = await comparePasswords(password, user.password);
 
-    if (passwordIsCorrect) {
-        const payload = { id: user.id };
-        const tokenOptions = { expiresIn: tokenLifetime };
-        const token = jwt.sign(payload, jwtOptions.secretOrKey, tokenOptions);
-        return res.json({ token });
-    }
+  if (passwordIsCorrect) {
+    const payload = { id: user.id };
+    const tokenOptions = { expiresIn: tokenLifetime };
+    const token = jwt.sign(payload, jwtOptions.secretOrKey, tokenOptions);
+    return res.json({ token });
+  }
 
-    return res.status(401).json({ error: 'Invalid password' });
+  return res.status(401).json({ error: 'Invalid password' });
 }
 
 // async function getUsers(req, res) {
@@ -73,61 +72,61 @@ async function login(req, res) {
 
 
 function requireAuthentication(req, res, next) {
-    return passport.authenticate(
-        'jwt',
-        { session: false },
-        (err, user, info) => {
-            if (err) {
-                return next(err);
-            }
+  return passport.authenticate(
+    'jwt',
+    { session: false },
+    (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
 
-            if (!user) {
-                const error = info.name === 'TokenExpiredError' ?
-                    'expired token' : 'invalid token';
+      if (!user) {
+        const error = info.name === 'TokenExpiredError'
+          ? 'expired token' : 'invalid token';
 
-                return res.status(401).json({ error });
-            }
+        return res.status(401).json({ error });
+      }
 
-            req.user = user;
-            return next();
-        },
-    )(req, res, next);
+      req.user = user;
+      return next();
+    },
+  )(req, res, next);
 }
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
-    console.warn('Not found', req.originalUrl);
-    res.status(404).json({ error: 'Not found' });
+  console.warn('Not found', req.originalUrl);
+  res.status(404).json({ error: 'Not found' });
 }
 
 function errorHandler(err, req, res, next) { // eslint-disable-line
-    console.error(err);
+  console.error(err);
 
-    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-        return res.status(400).json({ error: 'Invalid json' });
-    }
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'Invalid json' });
+  }
 
-    return res.status(500).json({ error: 'Internal server error' });
+  return res.status(500).json({ error: 'Internal server error' });
 }
 
 // app.get('/users/', getUsers);
 app.get('/', (req, res) => {
-    res.json({
-        login: '/users/login',
-        admin: '/users/admin',
-    });
+  res.json({
+    login: '/users/login',
+    admin: '/users/admin',
+  });
 });
 
 app.post('/users/login', login);
 
 app.get('/users/admin', requireAuthentication, (req, res) => {
-    res.json({ data: 'top secret' });
+  res.json({ data: 'top secret' });
 });
 
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 app.listen(port, () => {
-    if (host) {
-        console.info(`Server running at http://${host}:${port}/`);
-    }
+  if (host) {
+    console.info(`Server running at http://${host}:${port}/`);
+  }
 });
