@@ -30,9 +30,9 @@ function catchErrors(fn) {
  * @returns {array} Fylki af todos
  */
 async function listRoute(req, res) {
-  const { completed, order } = req.query;
+  const { category, order, search } = req.query;
 
-  const todos = await listTodos(order, completed);
+  const todos = await listTodos(order, category, search);
 
   return res.json(todos);
 }

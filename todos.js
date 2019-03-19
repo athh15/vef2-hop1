@@ -92,27 +92,46 @@ function validate({
 *                                  kláruð, getur verið tómt til að fá öll.
  * @returns {array} Fylki af todo items
  */
-async function listTodos(order = 'asc', completed = undefined) {
+async function listTodos(order = 'asc', category = '', search = '') {
   let result;
-
   const orderString = order.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
 
-  if (completed === 'false' || completed === 'true') {
-    const completedAsBoolean = completed !== 'false';
+  if (search && category) {
+    // str.includes("world");
+    // WHERE category = $1
     const q = `
     SELECT
       id, title, price, about, img, created
     FROM products
-    WHERE completed = $1
+    WHERE category_id = $1
+    AND title LIKE '%' || $2 || '%'
+    OR about LIKE '%' || $2 || '%'
     ORDER BY id ${orderString}`;
-    result = await query(q, [completedAsBoolean]);
+    result = await query(q, [category, search]);
+  } else if (category) {
+    // WHERE category = $1
+    const q = `
+    SELECT
+      id, title, price, about, img, created
+    FROM products
+    WHERE category_id = $1
+    ORDER BY id ${orderString}`;
+    result = await query(q, [category]);
+  } else if (search) {
+    const q = `
+    SELECT
+      id, title, price, about, img, created
+    FROM products
+    where title like '%' || $1 || '%'
+    OR about like '%' || $1 || '%'
+    ORDER BY id ${orderString}`;
+    result = await query(q, [search]);
   } else {
     const q = `
     SELECT
       id, title, price, about, img, created
     FROM products
     ORDER BY id ${orderString}`;
-
     result = await query(q);
   }
 
