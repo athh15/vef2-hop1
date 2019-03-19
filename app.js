@@ -54,8 +54,7 @@ async function login(req, res) {
     return res.status(401).json({ error: 'No such user' });
   }
 
-  const passwordIsCorrect =
-        await comparePasswords(password, user.password);
+  const passwordIsCorrect = await comparePasswords(password, user.password);
 
   if (passwordIsCorrect) {
     const payload = { id: user.id };
@@ -82,8 +81,8 @@ function requireAuthentication(req, res, next) {
       }
 
       if (!user) {
-        const error = info.name === 'TokenExpiredError' ?
-          'expired token' : 'invalid token';
+        const error = info.name === 'TokenExpiredError'
+          ? 'expired token' : 'invalid token';
 
         return res.status(401).json({ error });
       }

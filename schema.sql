@@ -9,7 +9,7 @@ CREATE TABLE products
   id serial primary key,
   -- category_id serial REFERENCES categories(id),
   title varchar(128) not null,
-  price int not null,
+  price float not null,
   about text not null,
   img text,
   created timestamp
