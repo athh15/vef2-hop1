@@ -21,38 +21,42 @@ CREATE TABLE products
     id serial primary key,
     email varchar(256) not null,
     password varchar(128) not null,
-    admin boolean default false
+    admin boolean default false,
+    created timestamp
+    with time zone not null default current_timestamp,
+  updated timestamp
+    with time zone not null default current_timestamp
   );
 
-  CREATE TABLE orders
-  (
-    id serial primary key,
-    user_id serial REFERENCES users(id),
-    is_order boolean,
-    name varchar(128),
-    address varchar(128),
-    created timestamp
-    with time zone not null default current_timestamp
+    CREATE TABLE orders
+    (
+      id serial primary key,
+      user_id serial REFERENCES users(id),
+      is_order boolean,
+      name varchar(128),
+      address varchar(128),
+      created timestamp
+      with time zone not null default current_timestamp
 );
 
-    CREATE TABLE productorders
-    (
-      id serial primary key,
-      order_id serial REFERENCES orders(id),
-      product_id serial REFERENCES products(id),
-      amount int not null
-    );
+      CREATE TABLE productorders
+      (
+        id serial primary key,
+        order_id serial REFERENCES orders(id),
+        product_id serial REFERENCES products(id),
+        amount int not null
+      );
 
-    CREATE TABLE todos
-    (
-      id serial primary key,
-      title varchar(128) not null,
-      position int default 0,
-      completed boolean default false,
-      due timestamp
-      with time zone,
+      CREATE TABLE todos
+      (
+        id serial primary key,
+        title varchar(128) not null,
+        position int default 0,
+        completed boolean default false,
+        due timestamp
+        with time zone,
   created timestamp
-      with time zone not null default current_timestamp,
+        with time zone not null default current_timestamp,
   updated timestamp
-      with time zone not null default current_timestamp
+        with time zone not null default current_timestamp
 );
