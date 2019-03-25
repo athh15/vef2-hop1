@@ -12,6 +12,11 @@ const { query } = require('./db');
  * @property {string} completed Hvort item sé búið, má vera tómt
  */
 
+ /**
+ * @typedef {object} CategoryItem
+ * @property {string} title Titill á item
+ */
+
 /**
  * @typedef {object} Result
  * @property {boolean} success Hvort aðgerð hafi tekist
@@ -142,6 +147,12 @@ async function listTodos(order = 'desc', category = '', search = '') {
   return result.rows;
 }
 
+async function listCategories(){
+  const result = await query('SELECT * FROM categories');
+
+  return result.rows;
+}
+
 /**
  * Sækir stakt todo item eftir auðkenni.
  *
@@ -222,6 +233,51 @@ async function createTodo({
 }
 
 /**
+ * Býr til todo item.
+ *
+ * @param {CategoryItem} category Category item til að búa til.
+ * @returns {Result} Niðurstaða þess að búa til item
+ */
+async function createCategory({
+  title,
+} = {}) {
+  // const validation = validate({ title, due, position });
+  const validation = [];
+  if (validation.length > 0) {
+    return {
+      success: false,
+      notFound: false,
+      validation,
+      item: null,
+    };
+  }
+
+  const columns = [
+    'title',
+  ].filter(Boolean);
+
+  const values = [
+    xss(title),
+  ].filter(Boolean);
+
+  const params = values.map((_, i) => `$${i + 1}`);
+
+  const sqlQuery = `
+    INSERT INTO categories (${columns.join(',')})
+    VALUES (${params})
+    RETURNING id, title`;
+  const result = await query(sqlQuery, values);
+
+  return {
+    success: true,
+    notFound: false,
+    validation: [],
+    item: result.rows[0],
+  };
+}
+
+
+/**
  * Uppfærir todo item.
  *
  * @param {Number} id Auðkenni á todo
@@ -287,6 +343,69 @@ async function updateTodo(id, {
   };
 }
 
+/**
+ * Uppfærir category item.
+ *
+ * @param {Number} id Auðkenni á category
+ * @param {CategoryItem} category Category item með gildum sem á að uppfæra
+ * @returns {Result} Niðurstaða þess að búa til item
+ */
+async function updateCategory(id, {
+  title,
+}) {
+  const validation = validate({
+    title,
+  }, true);
+
+  if (validation.length > 0) {
+    return {
+      success: false,
+      validation,
+    };
+  }
+
+  const filteredValues = [
+    xss(title),
+  ]
+    .filter(Boolean)
+    .concat([
+      // completed != null ? Boolean(completed) : null,
+    ]);
+
+  const updates = [
+    title ? 'title' : null,
+  ]
+    .filter(Boolean)
+    .map((field, i) => `${field} = $${i + 2}`);
+
+  const sqlQuery = `
+    UPDATE categories
+    SET ${updates} WHERE id = $1
+    RETURNING id, title`;
+  const values = [id, ...filteredValues];
+
+  const result = await query(sqlQuery, values);
+
+  if (result.rowCount === 0) {
+    return {
+      success: false,
+      validation: [],
+      notFound: true,
+      item: null,
+    };
+  }
+
+  return {
+    success: true,
+    validation: [],
+    notFound: false,
+    item: result.rows[0],
+  };
+}
+
+/**
+ * @param  {number} id Auðkenni fyrir todo sem á að eyða.
+ */
 async function deleteTodo(id) {
   const q = 'DELETE FROM products WHERE id = $1';
 
@@ -295,10 +414,28 @@ async function deleteTodo(id) {
   return result.rowCount === 1;
 }
 
+/**
+ * Eyðir category item
+ * 
+ * @param  {number} id Auðkenni fyrir category sem á að eyða.
+ * 
+ */
+async function deleteCategory(id) {
+  const q = 'DELETE FROM categories WHERE id = $1';
+
+  const result = await query(q, [id]);
+
+  return result.rowCount === 1;
+}
+
 module.exports = {
   listTodos,
+  listCategories,
   createTodo,
+  createCategory,
   readTodo,
   updateTodo,
+  updateCategory,
   deleteTodo,
+  deleteCategory,
 };
