@@ -157,15 +157,16 @@ async function patchUser(req, res) {
 
   const user = await findById(id);
 
-  // console.log(user.id);
-  if (!req.user.admin) {
-    return res.status(400).json({ error: 'User not an admin' });
-  }
-
   const result = await updateUser(user.id, admin);
   return res.status(200).json(result);
 }
 
+export default function checkIfAdmin(req, res, next) {
+  if (!req.user.admin) {
+    return next(res.status(400).json({ error: 'User not an admin' }));
+  }
+  return next();
+}
 
 function requireAuthentication(req, res, next) {
   return passport.authenticate(
@@ -216,7 +217,7 @@ app.get('/', (req, res) => {
 
 app.get('/users/', getUsers);
 app.get('/users/:id', requireAuthentication, getUserID); // Skíta fix fyrir /me for now
-app.patch('/users/:id', requireAuthentication, patchUser);
+app.patch('/users/:id', requireAuthentication, checkIfAdmin, patchUser); // Notandi þarf að vera admin
 app.post('/users/register', register);
 app.post('/users/login', login);
 app.get('/users/admin', requireAuthentication, (req, res) => {
