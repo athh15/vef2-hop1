@@ -161,7 +161,7 @@ async function patchUser(req, res) {
   return res.status(200).json(result);
 }
 
-export default function checkIfAdmin(req, res, next) {
+function checkIfAdmin(req, res, next) {
   if (!req.user.admin) {
     return next(res.status(400).json({ error: 'User not an admin' }));
   }
@@ -232,3 +232,6 @@ app.listen(port, () => {
     console.info(`Server running at http://${host}:${port}/`);
   }
 });
+module.exports = {
+  checkIfAdmin,
+};
