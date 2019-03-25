@@ -71,6 +71,7 @@ async function main() {
     console.error('Villa við að bæta gögnum við:', e.message);
   }
 
+
   await mock(12);
   await mock2(100);
 
