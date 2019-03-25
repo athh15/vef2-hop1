@@ -92,46 +92,50 @@ function validate({
 *                                  kláruð, getur verið tómt til að fá öll.
  * @returns {array} Fylki af todo items
  */
-async function listTodos(order = 'asc', category = '', search = '') {
+async function listTodos(order = 'desc', category = '', search = '') {
   let result;
   const orderString = order.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
-
+  console.log('search:',search,'category:', category, 'bæði:', search && category);
   if (search && category) {
     // str.includes("world");
     // WHERE category = $1
+    console.log('1');
     const q = `
     SELECT
-      id, title, price, about, img, created
+      id, category_id, title, price, about, img, created
     FROM products
     WHERE category_id = $1
     AND title LIKE '%' || $2 || '%'
     OR about LIKE '%' || $2 || '%'
-    ORDER BY id ${orderString}`;
+    ORDER BY created ${orderString}`;
     result = await query(q, [category, search]);
   } else if (category) {
+    console.log('2');
     // WHERE category = $1
     const q = `
     SELECT
-      id, title, price, about, img, created
+      id, category_id, title, price, about, img, created
     FROM products
     WHERE category_id = $1
-    ORDER BY id ${orderString}`;
+    ORDER BY created ${orderString}`;
     result = await query(q, [category]);
   } else if (search) {
+    console.log('3');
     const q = `
     SELECT
-      id, title, price, about, img, created
+      id, category_id, title, price, about, img, created
     FROM products
     where title like '%' || $1 || '%'
     OR about like '%' || $1 || '%'
-    ORDER BY id ${orderString}`;
+    ORDER BY created ${orderString}`;
     result = await query(q, [search]);
   } else {
+    console.log('4');
     const q = `
     SELECT
-      id, title, price, about, img, created
+      id, category_id, title, price, about, img, created
     FROM products
-    ORDER BY id ${orderString}`;
+    ORDER BY created ${orderString}`;
     result = await query(q);
   }
 
