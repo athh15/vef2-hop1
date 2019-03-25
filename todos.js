@@ -12,7 +12,7 @@ const { query } = require('./db');
  * @property {string} completed Hvort item sé búið, má vera tómt
  */
 
- /**
+/**
  * @typedef {object} CategoryItem
  * @property {string} title Titill á item
  */
@@ -107,10 +107,11 @@ async function listTodos(order = 'desc', category = '', search = '') {
     console.log('1');
     const q = `
     SELECT
-      id, category_id, title, price, about, img, created
-    FROM products
-    WHERE category_id = $1
-    AND title LIKE '%' || $2 || '%'
+      products.id, category_id, products.title, price, about, img, created, categories.title AS cat
+    FROM products,categories
+    WHERE categories.title = $1
+    AND categories.id = category_id
+    AND products.title LIKE '%' || $2 || '%'
     OR about LIKE '%' || $2 || '%'
     ORDER BY created ${orderString}`;
     result = await query(q, [category, search]);
@@ -416,9 +417,9 @@ async function deleteTodo(id) {
 
 /**
  * Eyðir category item
- * 
+ *
  * @param  {number} id Auðkenni fyrir category sem á að eyða.
- * 
+ *
  */
 async function deleteCategory(id) {
   const q = 'DELETE FROM categories WHERE id = $1';
