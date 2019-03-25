@@ -4,10 +4,14 @@ const express = require('express');
 
 const {
   listTodos,
+  listCategories,
   createTodo,
+  createCategory,
   readTodo,
   updateTodo,
+  updateCategory,
   deleteTodo,
+  deleteCategory,
 } = require('./todos');
 
 const router = express.Router();
@@ -30,11 +34,22 @@ function catchErrors(fn) {
  * @returns {array} Fylki af todos
  */
 async function listRoute(req, res) {
-  const { completed, order } = req.query;
+  const { category, order, search } = req.query;
 
-  const todos = await listTodos(order, completed);
+  const todos = await listTodos(order, category, search);
 
   return res.json(todos);
+}
+/**
+ * Route handler fyrir lista af categories gegnum GET.
+ * 
+ * @param  {object} req Request hlutur
+ * @param  {object} res Response hlutur
+ */
+async function listCategoriesRoute(req, res) {
+  const items = await listCategories();
+
+  return res.json(items);
 }
 
 /**
@@ -57,6 +72,22 @@ async function createRoute(req, res) {
     price,
     about,
     img,
+  });
+
+  if (!result.success) {
+    return res.status(400).json(result.validation);
+  }
+
+  return res.status(201).json(result.item);
+}
+
+async function createCategoryRoute(req, res) {
+  const {
+    title,
+  } = req.body;
+
+  const result = await createCategory({
+    title,
   });
 
   if (!result.success) {
@@ -115,6 +146,35 @@ async function patchRoute(req, res) {
 }
 
 /**
+ * Route handler til að breyta Category gegnum PATCH.
+ *
+ * @param {object} req Request hlutur
+ * @param {object} res Response hlutur
+ * @returns {object} Breytt category eða villa
+ */
+async function patchCategoryRoute(req, res) {
+  const { id } = req.params;
+  const {
+    title, 
+  } = req.body;
+  const item = {
+    title,
+  };
+
+  const result = await updateCategory(id, item);
+
+  if (!result.success && result.validation.length > 0) {
+    return res.status(400).json(result.validation);
+  }
+
+  if (!result.success && result.notFound) {
+    return res.status(404).json({ error: 'Item not found' });
+  }
+
+  return res.status(201).json(result.item);
+}
+
+/**
  * Route handler til að eyða todo gegnum DELETE.
  *
  * @param {object} req Request hlutur
@@ -133,10 +193,34 @@ async function deleteRoute(req, res) {
   return res.status(404).json({ error: 'Item not found' });
 }
 
+/**
+ * Route handler til að eyða category gegnum DELETE.
+ *
+ * @param {object} req Request hlutur
+ * @param {object} res Response hlutur
+ * @returns {object} Engu ef eytt, annars villu
+ */
+async function deleteCategoryRoute(req, res) {
+  const { id } = req.params;
+
+  const deleted = await deleteCategory(id);
+
+  if (deleted) {
+    return res.status(204).json({});
+  }
+
+  return res.status(404).json({ error: 'Item not found' });
+}
+
 router.get('/products', catchErrors(listRoute));
 router.get('/products/:id', catchErrors(todoRoute));
 router.post('/products', catchErrors(createRoute));
 router.patch('/products/:id', catchErrors(patchRoute));
 router.delete('/products/:id', catchErrors(deleteRoute));
+
+router.get('/categories', catchErrors(listCategoriesRoute));
+router.post('/categories', catchErrors(createCategoryRoute));
+router.patch('/categories/:id', catchErrors(patchCategoryRoute));
+router.delete('/categories/:id', catchErrors(deleteCategoryRoute));
 
 module.exports = router;

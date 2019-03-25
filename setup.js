@@ -13,22 +13,6 @@ const readFileAsync = util.promisify(fs.readFile);
 async function mock(n) {
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < n; i++) {
-    const productName = faker.commerce.productName();
-    const commercePrice = faker.commerce.price();
-    const paragraph = faker.lorem.paragraph();
-    const image = faker.image.image();
-
-    const q = `
-      INSERT INTO products (title, price, about, img)
-      VALUES ($1, $2, $3, $4)`;
-
-    await query(q, [productName, commercePrice, paragraph, image]);
-  }
-}
-
-async function mock2(n) {
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < n; i++) {
     const department = faker.commerce.department();
 
     const q = `
@@ -36,6 +20,29 @@ async function mock2(n) {
       VALUES ($1)`;
 
     await query(q, [department]);
+  }
+}
+
+async function mock2(n) {
+  // eslint-disable-next-line no-plusplus
+  //sækjs categorirs  geyma id-in i fylki or sum
+
+  const ids = await query('SELECT id FROM categories');
+
+  const idsarr = ids.rows;
+
+  for (let i = 0; i < n; i++) {
+    const productName = faker.commerce.productName();
+    const commercePrice = faker.commerce.price();
+    const paragraph = faker.lorem.paragraph();
+    const image = faker.image.image();
+    const category = Math.floor(Math.random() * idsarr.length + 1);
+
+    const q = `
+      INSERT INTO products (title, price, about, img, category_id)
+      VALUES ($1, $2, $3, $4, $5)`;
+
+    await query(q, [productName, commercePrice, paragraph, image, category]);
   }
 }
 
@@ -64,8 +71,9 @@ async function main() {
     console.error('Villa við að bæta gögnum við:', e.message);
   }
 
-  await mock(100);
-  await mock2(12);
+
+  await mock(12);
+  await mock2(100);
 
   console.info('Mock data inserted');
 }
