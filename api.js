@@ -42,7 +42,7 @@ async function listRoute(req, res) {
 }
 /**
  * Route handler fyrir lista af categories gegnum GET.
- * 
+ *
  * @param  {object} req Request hlutur
  * @param  {object} res Response hlutur
  */
@@ -155,7 +155,7 @@ async function patchRoute(req, res) {
 async function patchCategoryRoute(req, res) {
   const { id } = req.params;
   const {
-    title, 
+    title,
   } = req.body;
   const item = {
     title,

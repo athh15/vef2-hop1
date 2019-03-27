@@ -25,7 +25,7 @@ async function mock(n) {
 
 async function mock2(n) {
   // eslint-disable-next-line no-plusplus
-  //sækjs categorirs  geyma id-in i fylki or sum
+  // sækjs categorirs  geyma id-in i fylki or sum
 
   const ids = await query('SELECT id FROM categories');
 
@@ -73,7 +73,7 @@ async function main() {
 
 
   await mock(12);
-  await mock2(100);
+  await mock2(1000);
 
   console.info('Mock data inserted');
 }
