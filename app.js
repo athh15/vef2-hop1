@@ -13,10 +13,12 @@ const api = require('./api');
 
 const {
   PORT: port = 3000,
-  JWT_SECRET: jwtSecret,
+  JWT_SECRET: jwtSecret = '$dk3Ae9dknv#Gposiuhvkjkljd',
   TOKEN_LIFETIME: tokenLifetime = 60 * 60 * 24,
   HOST: host = '127.0.0.1',
 } = process.env;
+
+console.log(jwtSecret);
 
 if (!jwtSecret) {
   console.error('JWT_SECRET not registered in .env');
@@ -260,7 +262,6 @@ app.get('/', (req, res) => {
     getUserId: '/users/:id',
     register: '/users/register',
     login: '/users/login',
-    admin: '/users/admin',
   });
 });
 
@@ -269,12 +270,10 @@ app.get('/users/:id', requireAuthentication, checkIfAdmin, getUserID); // Skíta
 app.patch('/users/:id', requireAuthentication, checkIfAdmin, patchUser); // Notandi þarf að vera admin
 app.post('/users/register', register);
 app.post('/users/login', login);
-app.get('/users/admin', requireAuthentication, (req, res) => {
-  res.json({ data: 'top secret' });
-});
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
 
 app.listen(port, () => {
   if (host) {
