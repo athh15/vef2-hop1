@@ -100,7 +100,7 @@ function validate({
 async function listTodos(order = 'desc', category = '', search = '') {
   let result;
   const orderString = order.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
-  console.log('search:',search,'category:', category, 'bæði:', search && category);
+  console.log('search:', search, 'category:', category, 'bæði:', search && category);
   if (search && category) {
     // str.includes("world");
     // WHERE category = $1
@@ -148,9 +148,8 @@ async function listTodos(order = 'desc', category = '', search = '') {
   return result.rows;
 }
 
-async function listCategories(){
+async function listCategories() {
   const result = await query('SELECT * FROM categories');
-
   return result.rows;
 }
 

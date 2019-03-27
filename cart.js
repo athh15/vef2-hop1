@@ -12,13 +12,13 @@ function catchErrors(fn) {
   return (req, res, next) => fn(req, res, next).catch(next);
 }
 
-async function getCart(req, res) {
+// async function getCart(req, res) {
+//   const cart = await getCartUser();
+// }
 
-}
+// async function postCart(req, res) {
 
-async function postCart(req, res) {
-
-}
+// }
 
 routerCart.get('/cart', getCart);
 routerCart.post('/cart', postCart);

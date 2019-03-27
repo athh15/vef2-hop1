@@ -1,53 +1,38 @@
 require('dotenv').config();
 
-const express = require('express');
-const passport = require('passport');
-const { Strategy, ExtractJwt } = require('passport-jwt');
 const jwt = require('jsonwebtoken');
+const express = require('express');
+const { ExtractJwt } = require('passport-jwt');
 
 const {
   findById, findByUsername, comparePasswords, createUser, getAllUsers, updateUser, findByEmail,
 } = require('./users');
 
 const api = require('./api');
+const auth = require('./authentication');
 
 const {
   PORT: port = 3000,
-  JWT_SECRET: jwtSecret = '$dk3Ae9dknv#Gposiuhvkjkljd',
+  JWT_SECRET: jwtSecret,
   TOKEN_LIFETIME: tokenLifetime = 60 * 60 * 24,
   HOST: host = '127.0.0.1',
 } = process.env;
-
-console.log(jwtSecret);
 
 if (!jwtSecret) {
   console.error('JWT_SECRET not registered in .env');
   process.exit(1);
 }
 
-const app = express();
-
-app.use(express.json());
-app.use(api);
-
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: jwtSecret,
 };
 
-async function strat(data, next) {
-  const user = await findById(data.id);
+const app = express();
 
-  if (user) {
-    next(null, user);
-  } else {
-    next(null, false);
-  }
-}
-
-passport.use(new Strategy(jwtOptions, strat));
-
-app.use(passport.initialize());
+app.use(express.json());
+app.use(api);
+app.use(auth);
 
 /**
  * Fall sem loggar notendan inn, tekur username og password úr req.body
@@ -198,48 +183,6 @@ async function patchUser(req, res) {
   const result = await updateUser(user.id, admin);
   return res.status(200).json(result);
 }
-/**
- * Athugar hvort notandi sé admin
- * @param  {} req
- * @param  {} res
- * @param  {} next
- * @returns next() ef notandi er admin annars villu
- */
-function checkIfAdmin(req, res, next) {
-  if (!req.user.admin) {
-    return next(res.status(403).json({ error: 'Forbidden' }));
-  }
-  return next();
-}
-
-/**
- * Middleware sem athugar hvort notandi sé skráður inn eða ekki
- * @param  {} req
- * @param  {} res
- * @param  {} next
- * @returns next() ef notandi er skráður inn annars villu
- */
-function requireAuthentication(req, res, next) {
-  return passport.authenticate(
-    'jwt',
-    { session: false },
-    (err, user, info) => {
-      if (err) {
-        return next(err);
-      }
-
-      if (!user) {
-        const error = info.name === 'TokenExpiredError'
-          ? 'expired token' : 'invalid token';
-
-        return res.status(401).json({ error });
-      }
-
-      req.user = user;
-      return next();
-    },
-  )(req, res, next);
-}
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
   console.warn('Not found', req.originalUrl);
@@ -265,9 +208,9 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/users/', requireAuthentication, checkIfAdmin, getUsers);
-app.get('/users/:id', requireAuthentication, checkIfAdmin, getUserID); // Skíta fix fyrir /me for now
-app.patch('/users/:id', requireAuthentication, checkIfAdmin, patchUser); // Notandi þarf að vera admin
+app.get('/users/', auth.requireAuthentication, getUsers);
+app.get('/users/:id', auth.requireAuthentication, getUserID); // Skíta fix fyrir /me for now
+app.patch('/users/:id', auth.requireAuthentication, auth.checkIfAdmin, patchUser); // Notandi þarf að vera admin
 app.post('/users/register', register);
 app.post('/users/login', login);
 
@@ -280,6 +223,3 @@ app.listen(port, () => {
     console.info(`Server running at http://${host}:${port}/`);
   }
 });
-module.exports = {
-  checkIfAdmin,
-};
