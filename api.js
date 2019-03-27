@@ -14,6 +14,8 @@ const {
   deleteCategory,
 } = require('./todos');
 
+const auth = require('./authentication');
+
 const router = express.Router();
 
 /**
@@ -214,13 +216,13 @@ async function deleteCategoryRoute(req, res) {
 
 router.get('/products', catchErrors(listRoute));
 router.get('/products/:id', catchErrors(todoRoute));
-router.post('/products', catchErrors(createRoute));
-router.patch('/products/:id', catchErrors(patchRoute));
-router.delete('/products/:id', catchErrors(deleteRoute));
+router.post('/products', auth.requireAuthentication, auth.checkIfAdmin, catchErrors(createRoute));
+router.patch('/products/:id', auth.requireAuthentication, auth.checkIfAdmin, catchErrors(patchRoute));
+router.delete('/products/:id', auth.requireAuthentication, auth.checkIfAdmin, catchErrors(deleteRoute));
 
 router.get('/categories', catchErrors(listCategoriesRoute));
-router.post('/categories', catchErrors(createCategoryRoute));
-router.patch('/categories/:id', catchErrors(patchCategoryRoute));
-router.delete('/categories/:id', catchErrors(deleteCategoryRoute));
+router.post('/categories', auth.requireAuthentication, auth.checkIfAdmin, catchErrors(createCategoryRoute));
+router.patch('/categories/:id', auth.requireAuthentication, auth.checkIfAdmin, catchErrors(patchCategoryRoute));
+router.delete('/categories/:id', auth.requireAuthentication, auth.checkIfAdmin, catchErrors(deleteCategoryRoute));
 
 module.exports = router;
