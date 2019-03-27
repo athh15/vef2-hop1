@@ -13,7 +13,7 @@ const api = require('./api');
 
 const {
   PORT: port = 3000,
-  JWT_SECRET: jwtSecret = '$dk3Ae9dknv#Gposiuhvkjkljd',
+  JWT_SECRET: jwtSecret,
   TOKEN_LIFETIME: tokenLifetime = 60 * 60 * 24,
   HOST: host = '127.0.0.1',
 } = process.env;
