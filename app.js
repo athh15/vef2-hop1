@@ -207,7 +207,7 @@ async function patchUser(req, res) {
  */
 function checkIfAdmin(req, res, next) {
   if (!req.user.admin) {
-    return next(res.status(400).json({ error: 'User not an admin' }));
+    return next(res.status(403).json({ error: 'Forbidden' }));
   }
   return next();
 }
