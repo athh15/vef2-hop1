@@ -6,17 +6,19 @@ const { Strategy, ExtractJwt } = require('passport-jwt');
 const jwt = require('jsonwebtoken');
 
 const {
-  findById, findByEmail, comparePasswords, createUser, getAllUsers, updateUser,
+  findById, findByUsername, comparePasswords, createUser, getAllUsers, updateUser, findByEmail,
 } = require('./users');
 
 const api = require('./api');
 
 const {
   PORT: port = 3000,
-  JWT_SECRET: jwtSecret,
-  TOKEN_LIFETIME: tokenLifetime = 20 * 60,
+  JWT_SECRET: jwtSecret = '$dk3Ae9dknv#Gposiuhvkjkljd',
+  TOKEN_LIFETIME: tokenLifetime = 60 * 60 * 24,
   HOST: host = '127.0.0.1',
 } = process.env;
+
+console.log(jwtSecret);
 
 if (!jwtSecret) {
   console.error('JWT_SECRET not registered in .env');
@@ -47,10 +49,16 @@ passport.use(new Strategy(jwtOptions, strat));
 
 app.use(passport.initialize());
 
+/**
+ * Fall sem loggar notendan inn, tekur username og password úr req.body
+ * og leitar að notendanum í db
+ * @param  {} req
+ * @param  {} res
+ */
 async function login(req, res) {
-  const { email, password = '' } = req.body;
+  const { username, password = '' } = req.body;
 
-  const user = await findByEmail(email);
+  const user = await findByUsername(username);
 
   if (!user) {
     return res.status(401).json({ error: 'No such user' });
@@ -59,62 +67,91 @@ async function login(req, res) {
   const passwordIsCorrect = await comparePasswords(password, user.password);
 
   if (passwordIsCorrect) {
+    const notandi = await findById(user.id);
     const payload = { id: user.id };
     const tokenOptions = { expiresIn: tokenLifetime };
     const token = jwt.sign(payload, jwtOptions.secretOrKey, tokenOptions);
-    return res.json({ token });
+    return res.json({ notandi, token, tokenLifetime });
   }
 
   return res.status(401).json({ error: 'Invalid password' });
 }
 
 /**
+ * Validatear inputið hjá notendanum.
+ * @param  {} username
  * @param  {} email
  * @param  {} password
+ * @returns error fylki með öllum errors
  */
 
-async function validateUser(email, password) {
-  if (typeof email !== 'string' || email.length < 5) {
-    return { error: 'Netfang verður að vera amk 5 stafir' };
+async function validateUser(username, email, password) {
+  const errors = [];
+
+  if (typeof username !== 'string' || username.length < 5) {
+    errors.push({ field: 'username', error: 'Notendanafn verður að vera amk 5 stafir' });
   }
 
-  const user = await findByEmail(email);
+  if (typeof email !== 'string' || email.length < 1) {
+    errors.push({ field: 'email', error: 'Netfang má ekki vera tómt' });
+  }
+
+  const user = await findByUsername(username);
+
+  const userEmail = await findByEmail(email);
 
   if (user) {
-    return { error: 'Netfang er þegar skráð' };
+    errors.push({ field: 'username', error: 'Notendanafn er þegar skráð' });
+  }
+
+  if (userEmail) {
+    errors.push({ field: 'email', error: 'Notendanafn er þegar skráð' });
   }
 
   if (typeof password !== 'string' || password.length < 8) {
-    return { error: 'Lykilorð verður að vera amk 8 stafir' };
+    errors.push({ field: 'password', error: 'Lykilorð verður að vera amk 8 stafir' });
   }
-  return null;
+  return errors;
 }
-
+/**
+ * Fall sem býr til notenda, tekur username, email og password úr req.body
+ * ef það kemst í gegnum validation þá býr það til nýjan notenda annars birtir error
+ * @param  {} req
+ * @param  {} res
+ */
 async function register(req, res) {
-  const { email, password = '' } = req.body;
+  const { username, email, password = '' } = req.body;
 
-  const validationMessage = await validateUser(email, password);
+  const validationMessage = await validateUser(username, email, password);
 
-  if (validationMessage) {
+  if (validationMessage.length !== 0) {
     return res.status(400).json(validationMessage);
   }
-  await createUser(email, password);
+  await createUser(username, email, password);
 
-  const user = await findByEmail(email);
+  const user = await findByUsername(username);
 
   const payload = { id: user.id };
   const tokenOptions = { expiresIn: tokenLifetime };
   const token = jwt.sign(payload, jwtOptions.secretOrKey, tokenOptions);
-  return res.status(201).json({ token, email });
+  return res.status(201).json({ token, username });
 }
-
+/**
+ * Skila öllum notendum í db
+ * @param  {} req
+ * @param  {} res
+ */
 async function getUsers(req, res) {
   const users = await getAllUsers();
 
   return res.status(200).json(users);
 }
 
-
+/**
+ * Skilar notenda eftir id og skilar upplýsingar um notendan ef hann kallar á /me
+ * @param  {} req
+ * @param  {} res
+ */
 async function getUserID(req, res) {
   let { id } = req.params;
 
@@ -142,6 +179,7 @@ async function getUserID(req, res) {
 }
 
 /**
+ * Uppfærir upplýsingar um notenda ef notandi er admin
  * @param  {} req
  * @param  {} res
  */
@@ -160,14 +198,27 @@ async function patchUser(req, res) {
   const result = await updateUser(user.id, admin);
   return res.status(200).json(result);
 }
-
+/**
+ * Athugar hvort notandi sé admin
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ * @returns next() ef notandi er admin annars villu
+ */
 function checkIfAdmin(req, res, next) {
   if (!req.user.admin) {
-    return next(res.status(400).json({ error: 'User not an admin' }));
+    return next(res.status(403).json({ error: 'Forbidden' }));
   }
   return next();
 }
 
+/**
+ * Middleware sem athugar hvort notandi sé skráður inn eða ekki
+ * @param  {} req
+ * @param  {} res
+ * @param  {} next
+ * @returns next() ef notandi er skráður inn annars villu
+ */
 function requireAuthentication(req, res, next) {
   return passport.authenticate(
     'jwt',
@@ -211,21 +262,18 @@ app.get('/', (req, res) => {
     getUserId: '/users/:id',
     register: '/users/register',
     login: '/users/login',
-    admin: '/users/admin',
   });
 });
 
-app.get('/users/', getUsers);
-app.get('/users/:id', requireAuthentication, getUserID); // Skíta fix fyrir /me for now
+app.get('/users/', requireAuthentication, checkIfAdmin, getUsers);
+app.get('/users/:id', requireAuthentication, checkIfAdmin, getUserID); // Skíta fix fyrir /me for now
 app.patch('/users/:id', requireAuthentication, checkIfAdmin, patchUser); // Notandi þarf að vera admin
 app.post('/users/register', register);
 app.post('/users/login', login);
-app.get('/users/admin', requireAuthentication, (req, res) => {
-  res.json({ data: 'top secret' });
-});
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
 
 app.listen(port, () => {
   if (host) {

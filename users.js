@@ -20,14 +20,14 @@ async function query(q, values = []) {
   return result;
 }
 
-async function createUser(email, password) {
+async function createUser(username, email, password) {
   const hashedPassword = await bcrypt.hash(password, 11);
 
-  const q = `INSERT INTO users (email, password)
-  VALUES ($1, $2)
+  const q = `INSERT INTO users (username, email, password)
+  VALUES ($1, $2, $3)
   RETURNING *`;
 
-  const result = await query(q, [email, hashedPassword]);
+  const result = await query(q, [username, email, hashedPassword]);
 
   return result.rows[0];
 }
@@ -36,6 +36,18 @@ async function comparePasswords(hash, password) {
   const result = await bcrypt.compare(hash, password);
 
   return result;
+}
+
+async function findByUsername(username) {
+  const q = 'SELECT * FROM users WHERE username = $1';
+
+  const result = await query(q, [username]);
+
+  if (result.rowCount === 1) {
+    return result.rows[0];
+  }
+
+  return null;
 }
 
 async function findByEmail(email) {
@@ -82,6 +94,7 @@ async function findById(id) {
 
 module.exports = {
   comparePasswords,
+  findByUsername,
   findByEmail,
   findById,
   createUser,
