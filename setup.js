@@ -3,6 +3,7 @@ require('dotenv').config();
 const fs = require('fs');
 const util = require('util');
 const faker = require('faker');
+const cloudinary = require('cloudinary');
 
 const { query } = require('./db');
 
@@ -23,6 +24,12 @@ async function mock(n) {
   }
 }
 
+cloudinary.config({
+  cloud_name: 'flottsky',
+  api_key: '985742898674683',
+  api_secret: 'VO4tH7jqqxtHRsaPclgyVuvx7To',
+});
+
 async function mock2(n) {
   // eslint-disable-next-line no-plusplus
   //sækjs categorirs  geyma id-in i fylki or sum
@@ -31,11 +38,16 @@ async function mock2(n) {
 
   const idsarr = ids.rows;
 
-  for (let i = 0; i < n; i++) {
+  for (let i = 0; i < n; i += 1) {
+    const t = Math.floor(Math.random() * 20) + 1;
     const productName = faker.commerce.productName();
     const commercePrice = faker.commerce.price();
     const paragraph = faker.lorem.paragraph();
-    const image = faker.image.image();
+    // const image = faker.image.image();
+    // console.log("fokk");
+    const CLOUDINARY_URL = cloudinary.image('img' + i.toString());
+    // console.log(CLOUDINARY_URL);
+    const image = CLOUDINARY_URL.substring(10, CLOUDINARY_URL.length - 4);
     const category = Math.floor(Math.random() * idsarr.length + 1);
 
     const q = `
