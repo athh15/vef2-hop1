@@ -1,3 +1,24 @@
+# Uppsetning til að keyra vefþjónustuna.
+
+* `npm run setup`
+* `npm start`
+
+# Dæmi um köll í vefþjónustunni
+
+Bæta við köllum hér
+
+# Admin
+
+Til þess að skrá sig sem admin þá þarf að senda á `/users/login` 
+{ "username": "admin", "password": "123" }
+
+# Höfundar
+
+Alexander Þór Hafþórsson - athh15@hi.is - athh15
+Emil Alfreðsson - ema102@hi.is - fredzonn
+Þorsteinn Kristinn Ingólfsson - thi35@hi.is - steini96
+
+
 # Hópverkefni 1
 
 Útfæra skal vefþjónustur fyrir vefbúð með:
