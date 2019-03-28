@@ -18,7 +18,7 @@ const router = express.Router();
 
 const {
   PORT: port = 3000,
-  
+
 } = process.env;
 
 /**
@@ -40,7 +40,7 @@ function catchErrors(fn) {
  */
 async function listRoute(req, res) {
   const {
-    category, order, search,
+    category, search,
   } = req.query;
 
   let { offset = 0, limit = 10 } = req.query;
@@ -48,7 +48,7 @@ async function listRoute(req, res) {
   offset = Number(offset);
   limit = Number(limit);
 
-  const rows = await listTodos(order, category, search, offset, limit);
+  const rows = await listTodos(category, search, offset, limit);
 
   const result = {
     links: {

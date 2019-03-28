@@ -31,7 +31,7 @@ async function mock2(n) {
 
   const idsarr = ids.rows;
 
-  for (let i = 0; i < n; i++) {
+  for (let i = 0; i < n; i += 1) {
     const productName = faker.commerce.productName();
     const commercePrice = faker.commerce.price();
     const paragraph = faker.lorem.paragraph();

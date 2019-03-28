@@ -18,8 +18,6 @@ const {
   HOST: host = '127.0.0.1',
 } = process.env;
 
-console.log(jwtSecret);
-
 if (!jwtSecret) {
   console.error('JWT_SECRET not registered in .env');
   process.exit(1);

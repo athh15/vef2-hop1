@@ -97,17 +97,11 @@ function validate({
 *                                  kláruð, getur verið tómt til að fá öll.
  * @returns {array} Fylki af todo items
  */
-async function listTodos(order = 'desc', category = '', search = '', offset = 0, limit = 10) {
+async function listTodos(category = '', search = '', offset = 0, limit = 10) {
   let result;
+  const order = 'DESC';
 
-  const orderString = order.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
-  // eslint-disable-next-line no-console
-  console.log('search:', search, 'category:', category, 'bæði:', search && category);
   if (search && category) {
-    // str.includes("world");
-    // WHERE category = $1
-    // eslint-disable-next-line no-console
-    console.log('1');
     const q = `
     SELECT
       products.id, category_id, products.title, price, about, img, created, categories.title AS cat
@@ -116,40 +110,35 @@ async function listTodos(order = 'desc', category = '', search = '', offset = 0,
     AND categories.id = category_id
     AND products.title LIKE '%' || $2 || '%'
     OR about LIKE '%' || $2 || '%'
-    ORDER BY created ${orderString}
-    OFFSET $1 LIMIT $2`;
+    ORDER BY created ${order}
+    OFFSET $3 LIMIT $4`;
     result = await query(q, [category, search, offset, limit]);
   } else if (category) {
-    // eslint-disable-next-line no-console
-    console.log('2');
-    // WHERE category = $1
     const q = `
     SELECT
-      id, category_id, title, price, about, img, created
-    FROM products
-    WHERE category_id = $1
-    ORDER BY created ${orderString}`;
+      products.id, category_id, products.title, price, about, img, created, categories.title AS cat
+    FROM products,categories
+    WHERE categories.title = $1
+    AND categories.id = category_id
+    ORDER BY created ${order}
+    OFFSET $2 LIMIT $3`;
     result = await query(q, [category, offset, limit]);
   } else if (search) {
-    // eslint-disable-next-line no-console
-    console.log('3');
     const q = `
     SELECT
       id, category_id, title, price, about, img, created
     FROM products
     where title like '%' || $1 || '%'
     OR about like '%' || $1 || '%'
-    ORDER BY created ${orderString}
-    OFFSET $1 LIMIT $2`;
+    ORDER BY created ${order}
+    OFFSET $2 LIMIT $3`;
     result = await query(q, [search, offset, limit]);
   } else {
-    // eslint-disable-next-line no-console
-    console.log('4');
     const q = `
     SELECT
       id, category_id, title, price, about, img, created
     FROM products
-    ORDER BY created ${orderString}
+    ORDER BY created ${order}
     OFFSET $1 LIMIT $2`;
     result = await query(q, [offset, limit]);
   }
