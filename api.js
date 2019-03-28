@@ -114,7 +114,7 @@ async function todoRoute(req, res) {
   const todo = await readTodo(id);
 
   if (todo) {
-    return res.json(todo);
+    return res.status(200).json(todo);
   }
 
   return res.status(404).json({ error: 'Item not found' });

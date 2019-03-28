@@ -1,7 +1,6 @@
 /** @module todos */
 
 const xss = require('xss');
-const isISO8601 = require('validator/lib/isISO8601');
 const { query } = require('./db');
 
 /**
