@@ -63,6 +63,7 @@ async function listCategoriesRoute(req, res) {
  */
 async function createRoute(req, res) {
   const {
+    categoryId,
     title,
     price,
     about,
@@ -70,6 +71,7 @@ async function createRoute(req, res) {
   } = req.body;
 
   const result = await createTodo({
+    categoryId,
     title,
     price,
     about,

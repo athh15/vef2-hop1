@@ -44,8 +44,8 @@ function isEmpty(s) {
  * @returns {array} Fylki af villum sem komu upp, tómt ef engin villa
  */
 function validate({
-  title, due, position, completed,
-} = {}, patching = false) {
+  categoryId, title, price, about, img,
+} = {}, patching = false, category = false) {
   const errors = [];
 
   if (!patching || !isEmpty(title)) {
@@ -56,33 +56,42 @@ function validate({
       });
     }
   }
+  if (category) {
+    if (!patching || !isEmpty(categoryId)) {
+      if (typeof categoryId !== 'number' || Number(categoryId) < 0) {
+        errors.push({
+          field: 'categoryId',
+          message: 'Flokkur verður að vera tala og stærri eða jöfn 0',
+        });
+      }
+    }
 
-  if (!isEmpty(due)) {
-    if (typeof due !== 'string' || !isISO8601(due)) {
+    if (!patching || !isEmpty(price)) {
+      if (typeof price !== 'number' || Number(price) < 0) {
+        errors.push({
+          field: 'price',
+          message: 'Verð verður að vera tala og stærri eða jöfn 0',
+        });
+      }
+    }
+
+    if (!patching || !isEmpty(about)) {
+      if (typeof about !== 'string' || title.length < 1) {
+        errors.push({
+          field: 'about',
+          message: 'Umföllun verður að vera strengur sem er ekki tómur',
+        });
+      }
+    }
+
+    if (typeof img !== 'string') {
       errors.push({
-        field: 'due',
-        message: 'Dagsetning verður að vera gild ISO 8601 dagsetning',
+        field: 'img',
+        message: 'Verður að vera strengur',
       });
     }
   }
 
-  if (!isEmpty(position)) {
-    if (typeof position !== 'number' || Number(position) < 0) {
-      errors.push({
-        field: 'position',
-        message: 'Staðsetning verður að vera heiltala stærri eða jöfn 0',
-      });
-    }
-  }
-
-  if (!isEmpty(completed)) {
-    if (typeof completed !== 'boolean') {
-      errors.push({
-        field: 'completed',
-        message: 'Lokið verður að vera boolean gildi',
-      });
-    }
-  }
 
   return errors;
 }
@@ -189,10 +198,12 @@ async function readTodo(id) {
  * @returns {Result} Niðurstaða þess að búa til item
  */
 async function createTodo({
-  title, price, about, img,
+  categoryId, title, price, about, img,
 } = {}) {
-  // const validation = validate({ title, due, position });
-  const validation = [];
+  const validation = validate({
+    categoryId, title, price, about, img,
+  });
+
   if (validation.length > 0) {
     return {
       success: false,
@@ -203,6 +214,7 @@ async function createTodo({
   }
 
   const columns = [
+    'category_id',
     'title',
     price ? 'price' : null,
     about ? 'about' : null,
@@ -210,6 +222,7 @@ async function createTodo({
   ].filter(Boolean);
 
   const values = [
+    xss(categoryId),
     xss(title),
     price ? xss(price) : null,
     about ? xss(about) : null,
@@ -241,8 +254,7 @@ async function createTodo({
 async function createCategory({
   title,
 } = {}) {
-  // const validation = validate({ title, due, position });
-  const validation = [];
+  const validation = validate({ title, category: true });
   if (validation.length > 0) {
     return {
       success: false,
@@ -275,7 +287,6 @@ async function createCategory({
     item: result.rows[0],
   };
 }
-
 
 /**
  * Uppfærir todo item.
