@@ -3,12 +3,14 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const { ExtractJwt } = require('passport-jwt');
+const fs = require('fs');
 
 const {
   findById, findByUsername, comparePasswords, createUser, getAllUsers, updateUser, findByEmail,
 } = require('./users');
 
 const api = require('./api');
+const cart = require('./cart');
 const auth = require('./authentication');
 
 const {
@@ -31,6 +33,7 @@ const jwtOptions = {
 const app = express();
 
 app.use(express.json());
+app.use(cart);
 app.use(api);
 app.use(auth);
 
@@ -60,6 +63,24 @@ async function login(req, res) {
   }
 
   return res.status(401).json({ error: 'Invalid password' });
+}
+/**
+ * Athugar hvort passwordið sé eitt af 500 weak passwords
+ * @param  {} pass
+ * @returns true ef passwordið er eitt af 500, false annars
+ */
+function checkPassword(pass) {
+  return new Promise(((resolve, reject) => {
+    fs.readFile('./weakPasswords.txt', (error, result) => {
+      if (error) {
+        reject(error);
+      } else if (result.indexOf(pass) >= 0) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    });
+  }));
 }
 
 /**
@@ -93,11 +114,17 @@ async function validateUser(username, email, password) {
     errors.push({ field: 'email', error: 'Notendanafn er þegar skráð' });
   }
 
+  const weakPass = await checkPassword(password);
+  if (weakPass) {
+    errors.push({ field: 'password', error: 'Password too weak!' });
+  }
+
   if (typeof password !== 'string' || password.length < 8) {
     errors.push({ field: 'password', error: 'Lykilorð verður að vera amk 8 stafir' });
   }
   return errors;
 }
+
 /**
  * Fall sem býr til notenda, tekur username, email og password úr req.body
  * ef það kemst í gegnum validation þá býr það til nýjan notenda annars birtir error
@@ -112,6 +139,7 @@ async function register(req, res) {
   if (validationMessage.length !== 0) {
     return res.status(400).json(validationMessage);
   }
+
   await createUser(username, email, password);
 
   const user = await findByUsername(username);
