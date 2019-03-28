@@ -233,6 +233,52 @@ async function createTodo({
   };
 }
 
+async function createCartTodo({
+  is_order,
+  name,
+  address,
+} = {}) {
+  // const validation = validate({ title, due, position });
+  /*const validation = [];
+  if (validation.length > 0) {
+    return {
+      success: false,
+      notFound: false,
+      validation,
+      item: null,
+    };
+  }*/
+
+  /*const columns = [
+    'title',
+    price ? 'price' : null,
+    about ? 'about' : null,
+    img ? 'img' : null,
+  ].filter(Boolean);*/
+
+  /*const values = [
+    xss(title),
+    price ? xss(price) : null,
+    about ? xss(about) : null,
+    img ? xss(img) : null,
+  ].filter(Boolean);*/
+
+  // const params = values.map((_, i) => `$${i + 1}`);
+
+  const sqlQuery = `
+    INSERT INTO orders (${columns.join(',')})
+    VALUES (${params})
+    RETURNING id, title, price, about, img`;
+  const result = await query(sqlQuery, values);
+
+  return {
+    success: true,
+    notFound: false,
+    validation: [],
+    item: result.rows[0],
+  };
+}
+
 /**
  * Býr til todo item.
  *
@@ -434,6 +480,7 @@ module.exports = {
   listCategories,
   createTodo,
   createCategory,
+  createCartTodo,
   readTodo,
   updateTodo,
   updateCategory,
