@@ -233,6 +233,15 @@ app.get('/', (req, res) => {
     getUserId: '/users/:id',
     register: '/users/register',
     login: '/users/login',
+    listRoute: '/products',
+    todoRoute: '/products/:id',
+    createRoute: '/products',
+    patchRoute: '/products/:id',
+    deleteRoute: '/products/:id',
+    listCategoriesRoute: '/categories',
+    createCategoryRoute: '/categories',
+    patchCategoryRoute: '/categories/:id',
+    deleteCategoryRoute: '/categories/:id',
   });
 });
 

@@ -18,6 +18,11 @@ const auth = require('./authentication');
 
 const router = express.Router();
 
+const {
+  PORT: port = 3000,
+
+} = process.env;
+
 /**
  * Higher-order fall sem umlykur async middleware með villumeðhöndlun.
  *
@@ -36,12 +41,41 @@ function catchErrors(fn) {
  * @returns {array} Fylki af todos
  */
 async function listRoute(req, res) {
-  const { category, order, search } = req.query;
+  const {
+    category, search,
+  } = req.query;
 
-  const todos = await listTodos(order, category, search);
+  let { offset = 0, limit = 10 } = req.query;
 
-  return res.json(todos);
+  offset = Number(offset);
+  limit = Number(limit);
+
+  const rows = await listTodos(category, search, offset, limit);
+
+  const result = {
+    links: {
+      self: {
+        href: `http://localhost:${port}/?offset=${offset}&limit=${limit}`,
+      },
+    },
+    items: rows,
+  };
+
+  if (offset > 0) {
+    result.links.prev = {
+      href: `http://localhost:${port}/?offset=${offset - limit}&limit=${limit}`,
+    };
+  }
+
+  if (rows.length <= limit) {
+    result.links.next = {
+      href: `http://localhost:${port}/?offset=${Number(offset) + limit}&limit=${limit}`,
+    };
+  }
+
+  res.json(result);
 }
+
 /**
  * Route handler fyrir lista af categories gegnum GET.
  *
