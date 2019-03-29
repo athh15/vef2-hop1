@@ -29,14 +29,14 @@ const {
   JWT_SECRET: jwtSecret,
 } = process.env;
 
-if (!jwtSecret) {
-  console.error('JWT_SECRET not registered in .env');
-  process.exit(1);
-}
+// if (!jwtSecret) {
+//   console.error('JWT_SECRET not registered in .env');
+//   process.exit(1);
+// }
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken('JWT'),
-  secretOrKey: jwtSecret,
+  secretOrKey: process.env.JWT_SECRET = '$dk3Ae9dknv#Gposiuhvkjkljd',
 };
 
 passport.use(new Strategy(jwtOptions, strat));
