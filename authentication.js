@@ -29,6 +29,11 @@ const {
   JWT_SECRET: jwtSecret,
 } = process.env;
 
+if (!jwtSecret) {
+  console.error('JWT_SECRET not registered in .env');
+  process.exit(1);
+}
+
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken('JWT'),
   secretOrKey: jwtSecret,

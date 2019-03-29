@@ -27,7 +27,7 @@ if (!jwtSecret) {
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: jwtSecret,
+  secretOrKey: process.env,
 };
 
 const app = express();
