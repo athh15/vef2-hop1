@@ -11,9 +11,9 @@ app.use(express.json());
 
 /**
  * Strategy fyrir passport
- * @param  {} data
- * @param  {} next
- * @returns
+ * @param  {Object} data
+ * @param  {Object} next
+ * @returns next()
  */
 async function strat(data, next) {
   const user = await findById(data.id);
@@ -26,7 +26,7 @@ async function strat(data, next) {
 }
 
 const {
-  JWT_SECRET: jwtSecret,
+  JWT_SECRET: jwtSecret = '$dk3Ae9dknv#Gposiuhvkjkljd',
 } = process.env;
 
 const jwtOptions = {
