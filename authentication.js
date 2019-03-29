@@ -25,9 +25,10 @@ async function strat(data, next) {
   }
 }
 
-const {
-  JWT_SECRET: jwtSecret,
-} = process.env;
+// Þetta er ekki að virka hjá okkur fyrir Heroku
+// const {
+//   JWT_SECRET: jwtSecret,
+// } = process.env;
 
 // if (!jwtSecret) {
 //   console.error('JWT_SECRET not registered in .env');
