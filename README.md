@@ -11,7 +11,7 @@ Keyrt með:
 # Dæmi um köll í vefþjónustunni
 
 * /products
-    * Get skilar fylki af hlutum, dæmi um hlut er:
+    * Get skilar fylki af vöru hlutum, dæmi um hlut er:
     {
             "id": 77,
             "category_id": 2,
@@ -20,7 +20,38 @@ Keyrt með:
             "about": "Aut veniam ut accusamus perspiciatis blanditiis perferendis aut qui corrupti. Qui quia culpa. Velit sunt qui est iure temporibus dolore expedita ea. Itaque molestias mollitia. Voluptas culpa culpa.",
             "img": "http://res.cloudinary.com/flottsky/image/upload/img8",
             "created": "2019-03-27T22:29:46.086Z"
-        }
+      }
+    * Post býr til nýjan vöru hlut með uppsetningu eins og hér að ofan
+* /products:id
+    * Get skilar vöru hlut sem hefur lykilinn id
+    * Patch tekur inn hluta af vöru hlut og uppfærir vöruhlutinn með lykilinn id með þeim hluta
+    * Delete eyðir vöru hlut sem hefur lykilinn id
+* /products?search=x
+    * Get skilar vöru hlutum sem innihalda x í titli eða lýsingu
+* /products?category=x
+    * Get skilar vöru hlutum sem eru úr category x
+* /products?category=x&search=y
+    * Get skilar vöru hlutum sem eru úr category x og innihalda y í titli eða lýsingu
+* /categories
+    * Get skilar fylki af categories hlutum
+    * Post tekur inn gildi fyrir category hlut og býr til nýjan hlut úr þeim gildum  
+* /categories/:id
+    * Patch tekur inn hluta af category hlut og uppfærir hlutinn með lykilinn id með þeim hluta
+    * Delete eyðir category hlut sem hefur lykilinn id
+* /cart
+    * Post tekur inn gildi fyrir cart og býr til nýjan hlut úr þeim
+    * Get skilar fylki af cart hlutum
+* /orders
+    * Get skilar fylki af orders hlutum
+* /users
+    * Get skilar fylki af users hlutum
+* /users/:id
+    * Get skilar users hlut sem hefur lykilinn id
+    * Patch tekur inn hluta af users hlut og uppfærir hlutinn með lykilinn id með þeim hluta
+* /users/register
+    * Post tekur inn gildi fyrir users hlut og býr til nýjan hlut úr þeim gildum
+* /users/login
+    * Post tekur inn notandanafn og lykilorð og skráir user inn ef gilt
 
 # Admin
 
