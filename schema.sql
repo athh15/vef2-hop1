@@ -37,15 +37,19 @@ CREATE TABLE products
       name varchar(128),
       address varchar(128),
       created timestamp
+      with time zone not null default current_timestamp,
+      updated timestamp
       with time zone not null default current_timestamp
 );
 
       CREATE TABLE productorders
       (
         id serial primary key,
-        order_id serial REFERENCES orders(id),
-        product_id serial REFERENCES products(id),
-        amount int not null
+        user_id INT REFERENCES users(id),
+        order_id INT REFERENCES orders(id),
+        product_id INT REFERENCES products(id),
+        quantity INT not null,
+        total INT not null
       );
 
       CREATE TABLE todos
