@@ -26,8 +26,8 @@ async function strat(data, next) {
 }
 
 const {
-  JWT_SECRET: jwtSecret = '$dk3Ae9dknv#Gposiuhvkjkljd',
-} = process.env.JWT_SECRET;
+  JWT_SECRET: jwtSecret,
+} = process.env;
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken('JWT'),
