@@ -108,8 +108,6 @@ function validate({
 async function listTodos(category = '', search = '', offset = 0, limit = 10) {
   let result;
   const order = 'DESC';
-  const orderString = order.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
-
   if (search && category) {
     const q = `
     SELECT

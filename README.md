@@ -1,15 +1,30 @@
 # Uppsetning til að keyra vefþjónustuna.
 
+Til þess að keyra þarf postgresql gagnagrunn og setja tengistreng í srá undinr nafni .env.
+Keyrt með:
+
+* `npm install`
+* `npm run eslint`
 * `npm run setup`
 * `npm start`
 
 # Dæmi um köll í vefþjónustunni
 
-Bæta við köllum hér
+* /products
+    * Get skilar fylki af hlutum, dæmi um hlut er:
+    {
+            "id": 77,
+            "category_id": 2,
+            "title": "Generic Concrete Bike",
+            "price": 244,
+            "about": "Aut veniam ut accusamus perspiciatis blanditiis perferendis aut qui corrupti. Qui quia culpa. Velit sunt qui est iure temporibus dolore expedita ea. Itaque molestias mollitia. Voluptas culpa culpa.",
+            "img": "http://res.cloudinary.com/flottsky/image/upload/img8",
+            "created": "2019-03-27T22:29:46.086Z"
+        }
 
 # Admin
 
-Til þess að skrá sig sem admin þá þarf að senda á `/users/login` 
+Til þess að skrá sig sem admin þá þarf að senda á `/users/login`
 { "username": "admin", "password": "123" }
 
 # Höfundar
