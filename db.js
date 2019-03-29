@@ -1,6 +1,5 @@
 
 const { Client } = require('pg');
-const xss = require('xss');
 
 /**
  * Execute an SQL query.
@@ -29,7 +28,10 @@ async function query(sqlQuery, values = []) {
 
   return result;
 }
-
+/**
+ * Nær í allar orders
+ * @returns {array} skilar öllum orders fyrir admin
+ */
 async function getAllOrdersUser() {
   const q = `
   SELECT id, user_id, name, address, created, updated
@@ -43,7 +45,11 @@ async function getAllOrdersUser() {
 
   return result.rows[0];
 }
-
+/**
+ * Skilar orders eftir id
+ * @param  {int} id
+ * @returns {array} Skilar order af id
+ */
 async function getOrdersUser(id) {
   const q = `
   SELECT id, user_id, name, address, created, updated
@@ -58,7 +64,11 @@ async function getOrdersUser(id) {
 
   return result.rows[0];
 }
-
+/**
+ * Skilar körfu notenda
+ * @param  {object} id userid
+ * @returns {array} körfu
+ */
 async function getCartUser(id) {
   const q = `
   SELECT id, product_id, quantity, total
@@ -73,7 +83,13 @@ async function getCartUser(id) {
 
   return result.rows[0];
 }
-
+/**
+ * Bætir við product í körfu
+ * @param  {object} product
+ * @param  {object} quantity
+ * @param  {object} userid
+ * @returns {array} Af körfunni
+ */
 async function addToCart(product, quantity, userid) {
   const total = await query('SELECT price from products where id = $1', [product]);
   let { price } = total.rows[0];

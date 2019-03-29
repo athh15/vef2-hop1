@@ -9,6 +9,12 @@ const {
 const app = express();
 app.use(express.json());
 
+/**
+ * Strategy fyrir passport
+ * @param  {} data
+ * @param  {} next
+ * @returns
+ */
 async function strat(data, next) {
   const user = await findById(data.id);
 
@@ -34,9 +40,9 @@ app.use(passport.initialize());
 
 /**
  * Middleware sem athugar hvort notandi sé admin
- * @param  {} req
- * @param  {} res
- * @param  {} next
+ * @param  {object} req
+ * @param  {object} res
+ * @param  {object} next
  * @returns next() ef notandi er admin annars villu
  */
 function checkIfAdmin(req, res, next) {
@@ -48,9 +54,9 @@ function checkIfAdmin(req, res, next) {
 
 /**
  * Middleware sem athugar hvort notandi sé skráður inn eða ekki
- * @param  {} req
- * @param  {} res
- * @param  {} next
+ * @param  {object} req
+ * @param  {object} res
+ * @param  {object} next
  * @returns next() ef notandi er skráður inn annars villu
  */
 function requireAuthentication(req, res, next) {

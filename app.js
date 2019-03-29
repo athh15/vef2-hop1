@@ -40,8 +40,9 @@ app.use(auth);
 /**
  * Fall sem loggar notendan inn, tekur username og password úr req.body
  * og leitar að notendanum í db
- * @param  {} req
- * @param  {} res
+ * @param  {object} req
+ * @param  {object} res
+ * @returns {array} notandanum, token og tokenlifetime
  */
 async function login(req, res) {
   const { username, password = '' } = req.body;
@@ -66,8 +67,8 @@ async function login(req, res) {
 }
 /**
  * Athugar hvort passwordið sé eitt af 500 weak passwords
- * @param  {} pass
- * @returns true ef passwordið er eitt af 500, false annars
+ * @param  {string} pass
+ * @returns {Promise} true ef passwordið er eitt af 500, false annars
  */
 function checkPassword(pass) {
   return new Promise(((resolve, reject) => {
@@ -85,10 +86,10 @@ function checkPassword(pass) {
 
 /**
  * Validatear inputið hjá notendanum.
- * @param  {} username
- * @param  {} email
- * @param  {} password
- * @returns error fylki með öllum errors
+ * @param  {string} username
+ * @param  {string} email
+ * @param  {string} password
+ * @returns {array} error fylki með öllum errors
  */
 
 async function validateUser(username, email, password) {
@@ -128,8 +129,9 @@ async function validateUser(username, email, password) {
 /**
  * Fall sem býr til notenda, tekur username, email og password úr req.body
  * ef það kemst í gegnum validation þá býr það til nýjan notenda annars birtir error
- * @param  {} req
- * @param  {} res
+ * @param  {object} req
+ * @param  {object} res
+ * @returns {Array} Nýr notandi annars villa
  */
 async function register(req, res) {
   const { username, email, password = '' } = req.body;
@@ -151,8 +153,9 @@ async function register(req, res) {
 }
 /**
  * Skila öllum notendum í db
- * @param  {} req
- * @param  {} res
+ * @param  {object} req
+ * @param  {object} res
+ * @returns {array} af öllum notendum
  */
 async function getUsers(req, res) {
   const users = await getAllUsers();
@@ -162,8 +165,9 @@ async function getUsers(req, res) {
 
 /**
  * Skilar notenda eftir id og skilar upplýsingar um notendan ef hann kallar á /me
- * @param  {} req
- * @param  {} res
+ * @param  {object} req
+ * @param  {object} res
+ * @returns {Array} Notanda annars villu
  */
 async function getUserID(req, res) {
   let { id } = req.params;
@@ -193,8 +197,9 @@ async function getUserID(req, res) {
 
 /**
  * Uppfærir upplýsingar um notenda ef notandi er admin
- * @param  {} req
- * @param  {} res
+ * @param  {object} req
+ * @param  {object} res
+ * @returns {Array} uppfærðan notenda, annars villu ef notandi finnst ekki
  */
 async function patchUser(req, res) {
   const { id } = req.params;
@@ -242,6 +247,9 @@ app.get('/', (req, res) => {
     createCategoryRoute: '/categories',
     patchCategoryRoute: '/categories/:id',
     deleteCategoryRoute: '/categories/:id',
+    postCart: '/cart',
+    getCart: '/cart',
+    getOrders: '/orders',
   });
 });
 

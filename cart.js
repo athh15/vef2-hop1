@@ -3,7 +3,7 @@ const express = require('express');
 const routerCart = express.Router();
 
 const {
-  getOrdersUser, getAllOrdersUser, addToCart, getCartUser,
+    getOrdersUser, getAllOrdersUser, addToCart, getCartUser,
 } = require('./db');
 const { readTodo } = require('./todos');
 
@@ -16,86 +16,100 @@ const auth = require('./authentication');
  * @returns {function} Middleware með villumeðhöndlun
  */
 function catchErrors(fn) {
-  return (req, res, next) => fn(req, res, next).catch(next);
+    return (req, res, next) => fn(req, res, next).catch(next);
 }
-
+/**
+ * Route handler til að sækja orders með get
+ * @param  {object} req
+ * @param  {object} res
+ * @returns {object} Order sem er verið að sækja eða villur
+ */
 async function getOrders(req, res) {
-  const { user } = req;
+    const { user } = req;
 
-  let orders = null;
+    let orders = null;
 
-  if (user.admin) {
-    orders = await getAllOrdersUser(user.id);
-  } else {
-    orders = await getOrdersUser(user.id);
-  }
+    if (user.admin) {
+        orders = await getAllOrdersUser(user.id);
+    } else {
+        orders = await getOrdersUser(user.id);
+    }
 
 
-  if (orders) {
-    return res.status(200).json(orders);
-  }
-  return res.status(404).json({ error: 'No orders' });
+    if (orders) {
+        return res.status(200).json(orders);
+    }
+    return res.status(404).json({ error: 'No orders' });
 }
 
 /**
  * Validatear inputið hjá notendanum.
- * @param  {} username
- * @param  {} email
- * @param  {} password
- * @returns error fylki með öllum errors
+ * @param  {object} product
+ * @param  {object} quantity
+ * @returns {array} error fylki með öllum errors
  */
 
 async function validateCart(product, quantity) {
-  const errors = [];
+    const errors = [];
 
-  const item = await readTodo(product);
+    const item = await readTodo(product);
 
-  if (typeof product !== 'number' || Number(product) < 0) {
-    errors.push({ field: 'product', error: 'Product must be a positive integer' });
-  }
+    if (typeof product !== 'number' || Number(product) < 0) {
+        errors.push({ field: 'product', error: 'Product must be a positive integer' });
+    }
 
-  if (!item) {
-    errors.push({ field: 'product', error: 'Product does not exist' });
-  }
+    if (!item) {
+        errors.push({ field: 'product', error: 'Product does not exist' });
+    }
 
-  if (typeof quantity !== 'number' || Number(quantity) < 0) {
-    errors.push({ field: 'quantity', error: 'Quantity must be a positive integer' });
-  }
+    if (typeof quantity !== 'number' || Number(quantity) < 0) {
+        errors.push({ field: 'quantity', error: 'Quantity must be a positive integer' });
+    }
 
-  return errors;
+    return errors;
 }
-
+/**
+ * Route handler til að útbúa cart með post
+ * @param  {object} req
+ * @param  {object} res
+ * @returns {array} Körfunni og iteminu sem var bætt við, annars villu
+ */
 async function postCart(req, res) {
-  const {
-    product,
-    quantity = '',
-  } = req.body;
+    const {
+        product,
+        quantity = '',
+    } = req.body;
 
-  const { user } = req;
+    const { user } = req;
 
-  const validationMessage = await validateCart(product, quantity);
+    const validationMessage = await validateCart(product, quantity);
 
-  if (validationMessage.length !== 0) {
-    return res.status(400).json(validationMessage);
-  }
+    if (validationMessage.length !== 0) {
+        return res.status(400).json(validationMessage);
+    }
 
-  const item = await readTodo(product);
+    const item = await readTodo(product);
 
-  const cart = await addToCart(product, quantity, user.id);
+    const cart = await addToCart(product, quantity, user.id);
 
 
-  return res.status(201).json({ cart, item });
+    return res.status(201).json({ cart, item });
 }
-
+/**
+ * Skilar körfu notenda
+ * @param  {object} req
+ * @param  {object} res
+ * @returns {Array} af körfu
+ */
 async function getCart(req, res) {
-  const { user } = req;
+    const { user } = req;
 
-  const cart = await getCartUser(user.id);
+    const cart = await getCartUser(user.id);
 
-  if (cart) {
-    return res.status(200).json(cart);
-  }
-  return res.status(404).json({ error: 'No cart' });
+    if (cart) {
+        return res.status(200).json(cart);
+    }
+    return res.status(404).json({ error: 'No cart' });
 }
 
 routerCart.post('/cart', auth.requireAuthentication, catchErrors(postCart));

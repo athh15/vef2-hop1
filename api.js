@@ -118,7 +118,12 @@ async function createRoute(req, res) {
 
   return res.status(201).json(result.item);
 }
-
+/**
+ * Route handler til þess að búa til Category
+ * @param  {object} req
+ * @param  {object} res
+ * @returns skilar nýja category annars villu
+ */
 async function createCategoryRoute(req, res) {
   const {
     title,
