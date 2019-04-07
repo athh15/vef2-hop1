@@ -27,7 +27,7 @@ if (!jwtSecret) {
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env,
+  secretOrKey: process.env.JWT_SECRET = '$dk3Ae9dknv#Gposiuhvkjkljd',
 };
 
 const app = express();
